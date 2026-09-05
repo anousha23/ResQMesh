@@ -89,4 +89,11 @@ export const getIncidents = async () => {
   return incidents || [];
 };
 
+export const resetUserData = async () => {
+  await removeItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+  await removeItem(STORAGE_KEYS.USER_PROFILE);
+  await removeItem(STORAGE_KEYS.MEDICAL_DETAILS);
+  await removeItem(STORAGE_KEYS.EMERGENCY_CONTACT);
+};
+
 export default STORAGE_KEYS;

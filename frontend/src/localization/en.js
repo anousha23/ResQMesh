@@ -1,9 +1,7 @@
 export default {
   // Navigation
   home: 'HOME',
-  alerts: 'ALERTS',
   sos: 'SOS',
-  network: 'NETWORK',
   profile: 'PROFILE',
 
   // Status
@@ -16,6 +14,10 @@ export default {
   greeting: 'Good morning',
   protectingLocally: 'ResQMesh is protecting you locally',
   nearbySituation: 'NEARBY SITUATION',
+  emergencyNearby: 'Emergency Nearby',
+  emergencyNearbyDesc: 'Structural damage reported 1.8 km away • Block A',
+  emergencyNearbyAction: 'Move to the nearest safe zone.',
+  verifiedAdvisory: 'Official Advisory',
   highPriority: 'HIGH PRIORITY',
   mediumPriority: 'MEDIUM PRIORITY',
   lowPriority: 'LOW PRIORITY',
@@ -35,10 +37,15 @@ export default {
   cancel: 'Cancel',
   activate: 'Activate SOS',
   sosActive: 'SOS ACTIVE',
-  relaying: 'Your emergency request is being relayed.',
+  relaying: 'Your emergency request is being broadcast.',
   cancelSos: 'Cancel SOS',
   received: 'Received',
   searching: 'Searching',
+  voiceCaptured: 'Voice captured',
+  emergencyMessageCreated: 'Emergency beacon created',
+  broadcastingLocally: 'Broadcasting signal locally...',
+  networkConnected: 'Local network connected',
+  respondersAlerted: 'Responders alerted',
 
   // Report Emergency
   reportEmergencyTitle: 'Report Emergency',
@@ -60,20 +67,6 @@ export default {
   creatingIncident: 'Creating incident...',
   classifyingEmergency: 'Classifying emergency...',
   packagingEvidence: 'Packaging evidence...',
-  broadcastingLocally: 'Broadcasting locally...',
-
-  // Network
-  howResqmeshWorks: 'HOW RESQMESH WORKS',
-  yourDevice: 'YOUR DEVICE',
-  nearbyNode: 'NEARBY NODE',
-  relayNode: 'RELAY NODE',
-  responder: 'RESPONDER',
-  nearbyNodes: 'NEARBY NODES',
-  signal: 'Signal',
-  role: 'Role',
-  messageRelay: 'MESSAGE RELAY',
-  hops: 'hops',
-  confidence: 'confidence',
 
   // Safe Zones
   offlineDirections: 'Offline directions available',
@@ -84,6 +77,11 @@ export default {
   medicalDetails: 'Medical Details',
   emergencyContact: 'Emergency Contact',
   preferredLanguage: 'Preferred Language',
+  logoutAndReset: 'Log Out & Start Again',
+  logoutAndResetDesc: 'Clear your current profile and return to the setup process.',
+  logoutConfirmTitle: 'Start Again?',
+  logoutConfirmMessage: 'Are you sure you want to log out and start again?\nYour current profile information will be cleared and you will return to the initial setup.',
+  logoutConfirmButton: 'Yes, Log Out & Start Again',
 
   // Onboarding
   step1: 'Step 1 of 3',

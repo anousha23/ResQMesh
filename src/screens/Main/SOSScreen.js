@@ -142,8 +142,7 @@ export default function SOSScreen() {
       transcription: "I am trapped inside a building near Block A. Please send help.",
       timestamp: new Date().toISOString(),
       location: "Block A",
-      originNode: "NODE-001",
-      status: "RELAYING"
+      status: "DISPATCHED"
     };
     console.log("Created Incident:", incidentPacket);
   };
@@ -233,11 +232,11 @@ export default function SOSScreen() {
         <View style={styles.centerContainer}>
           <Text style={styles.activeTitle}>PROCESSING VOICE SOS</Text>
           <Ionicons name="radio" size={80} color="#ef4444" style={{marginVertical: 32}} />
-          {sendStep >= 0 && <Text style={styles.animText}>✓ Voice captured</Text>}
-          {sendStep >= 1 && <Text style={styles.animText}>✓ Emergency message created</Text>}
-          {sendStep >= 2 && <Text style={styles.animText}>✓ Broadcasting locally</Text>}
-          {sendStep >= 3 && <Text style={styles.animText}>✓ NODE-001 received</Text>}
-          {sendStep >= 4 && <Text style={styles.animText}>✓ NODE-004 relaying</Text>}
+          {sendStep >= 0 && <Text style={styles.animText}>✓ {t('voiceCaptured')}</Text>}
+          {sendStep >= 1 && <Text style={styles.animText}>✓ {t('emergencyMessageCreated')}</Text>}
+          {sendStep >= 2 && <Text style={styles.animText}>✓ {t('broadcastingLocally')}</Text>}
+          {sendStep >= 3 && <Text style={styles.animText}>✓ {t('networkConnected')}</Text>}
+          {sendStep >= 4 && <Text style={styles.animText}>✓ {t('respondersAlerted')}</Text>}
         </View>
       </SafeAreaView>
     );
@@ -269,25 +268,25 @@ export default function SOSScreen() {
 
           <View style={styles.relayStatusContainer}>
             <View style={styles.relayRow}>
-              <Ionicons name="git-network" size={24} color="#16a34a" />
+              <Ionicons name="radio" size={24} color="#16a34a" />
               <Text style={styles.relayText}>LOCAL NETWORK: Connected</Text>
             </View>
             {step >= 1 && (
               <View style={styles.relayRow}>
                 <Ionicons name="checkmark-circle" size={24} color="#3b82f6" />
-                <Text style={styles.relayText}>NODE-001: {t('received')}</Text>
+                <Text style={styles.relayText}>EMERGENCY SIGNAL: Broadcasted</Text>
               </View>
             )}
             {step >= 2 && (
               <View style={styles.relayRow}>
-                <Ionicons name="swap-horizontal" size={24} color="#f59e0b" />
-                <Text style={styles.relayText}>NODE-004: Relaying</Text>
+                <Ionicons name="shield-checkmark" size={24} color="#f59e0b" />
+                <Text style={styles.relayText}>ResQMesh Network: Active</Text>
               </View>
             )}
             {step >= 3 && (
               <View style={styles.relayRow}>
                 <Ionicons name="search" size={24} color="#ef4444" />
-                <Text style={styles.relayText}>RESPONDER: {t('searching')}</Text>
+                <Text style={styles.relayText}>Responders: Alerted</Text>
               </View>
             )}
           </View>

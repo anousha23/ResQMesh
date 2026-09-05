@@ -1,9 +1,7 @@
 export default {
   // Navigation
   home: 'होम',
-  alerts: 'अलर्ट',
   sos: 'SOS',
-  network: 'नेटवर्क',
   profile: 'प्रोफ़ाइल',
 
   // Status
@@ -16,6 +14,10 @@ export default {
   greeting: 'सुप्रभात',
   protectingLocally: 'ResQMesh आपकी स्थानीय रूप से रक्षा कर रहा है',
   nearbySituation: 'आसपास की स्थिति',
+  emergencyNearby: 'आसपास आपातकाल',
+  emergencyNearbyDesc: '1.8 किमी दूर संरचनात्मक क्षति की सूचना • ब्लॉक ए',
+  emergencyNearbyAction: 'निकटतम सुरक्षित क्षेत्र में जाएं।',
+  verifiedAdvisory: 'आधिकारिक सलाह',
   highPriority: 'उच्च प्राथमिकता',
   mediumPriority: 'मध्यम प्राथमिकता',
   lowPriority: 'कम प्राथमिकता',
@@ -35,10 +37,15 @@ export default {
   cancel: 'रद्द करें',
   activate: 'SOS सक्रिय करें',
   sosActive: 'SOS सक्रिय',
-  relaying: 'आपका आपातकालीन अनुरोध रिले किया जा रहा है।',
+  relaying: 'आपका आपातकालीन अनुरोध प्रसारित किया जा रहा है।',
   cancelSos: 'SOS रद्द करें',
   received: 'प्राप्त हुआ',
   searching: 'खोज रहा है',
+  voiceCaptured: 'आवाज़ रिकॉर्ड हुई',
+  emergencyMessageCreated: 'आपातकालीन संकेत तैयार',
+  broadcastingLocally: 'स्थानीय रूप से प्रसारित किया जा रहा है...',
+  networkConnected: 'स्थानीय नेटवर्क से जुड़ा हुआ है',
+  respondersAlerted: 'राहत दल को सतर्क किया गया',
 
   // Report Emergency
   reportEmergencyTitle: 'आपातकाल की रिपोर्ट करें',
@@ -60,20 +67,6 @@ export default {
   creatingIncident: 'घटना बनाई जा रही है...',
   classifyingEmergency: 'आपातकाल वर्गीकृत किया जा रहा है...',
   packagingEvidence: 'सबूत पैक किए जा रहे हैं...',
-  broadcastingLocally: 'स्थानीय रूप से प्रसारित किया जा रहा है...',
-
-  // Network
-  howResqmeshWorks: 'RESQMESH कैसे काम करता है',
-  yourDevice: 'आपका डिवाइस',
-  nearbyNode: 'आस-पास का नोड',
-  relayNode: 'रिले नोड',
-  responder: 'उत्तरदाता',
-  nearbyNodes: 'आस-पास के नोड',
-  signal: 'सिग्नल',
-  role: 'भूमिका',
-  messageRelay: 'संदेश रिले',
-  hops: 'हॉप्स',
-  confidence: 'आत्मविश्वास',
 
   // Safe Zones
   offlineDirections: 'ऑफ़लाइन दिशा-निर्देश उपलब्ध',
@@ -84,6 +77,11 @@ export default {
   medicalDetails: 'चिकित्सा विवरण',
   emergencyContact: 'आपातकालीन संपर्क',
   preferredLanguage: 'पसंदीदा भाषा',
+  logoutAndReset: 'लॉग आउट और फिर से शुरू करें',
+  logoutAndResetDesc: 'अपनी वर्तमान प्रोफ़ाइल साफ़ करें और सेटअप प्रक्रिया पर वापस जाएं।',
+  logoutConfirmTitle: 'फिर से शुरू करें?',
+  logoutConfirmMessage: 'क्या आप वाकई लॉग आउट करके फिर से शुरू करना चाहते हैं?\nआपकी वर्तमान प्रोफ़ाइल जानकारी हटा दी जाएगी और आप प्रारंभिक सेटअप पर वापस लौट जाएंगे।',
+  logoutConfirmButton: 'हां, लॉग आउट और फिर से शुरू करें',
 
   // Onboarding
   step1: '3 में से 1 कदम',

@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, View, Platform } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 
-// Disable react-native-screens on Web to prevent blank screen rendering bugs
 if (Platform.OS === 'web') {
   enableScreens(false);
 }
@@ -20,10 +19,9 @@ import MedicalDetailsScreen from './src/screens/Onboarding/MedicalDetailsScreen'
 import EmergencyContactScreen from './src/screens/Onboarding/EmergencyContactScreen';
 
 import HomeScreen from './src/screens/Main/HomeScreen';
-import AlertsScreen from './src/screens/Main/AlertsScreen';
 import SOSScreen from './src/screens/Main/SOSScreen';
-import NetworkScreen from './src/screens/Main/NetworkScreen';
 import ProfileScreen from './src/screens/Main/ProfileScreen';
+import LogoutConfirmScreen from './src/screens/Main/LogoutConfirmScreen';
 
 import ReportEmergencyScreen from './src/screens/Features/ReportEmergencyScreen';
 import SafeZonesScreen from './src/screens/Features/SafeZonesScreen';
@@ -46,14 +44,11 @@ function MainTabs() {
   const { t } = useTranslation();
   return (
     <Tab.Navigator
-      initialRouteName="Home"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
-          else if (route.name === 'Alerts') iconName = focused ? 'warning' : 'warning-outline';
           else if (route.name === 'SOS') iconName = focused ? 'alert-circle' : 'alert-circle-outline';
-          else if (route.name === 'Network') iconName = focused ? 'git-network' : 'git-network-outline';
           else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -66,9 +61,7 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: t('home') }} />
-      <Tab.Screen name="Alerts" component={AlertsScreen} options={{ title: t('alerts') }} />
-      <Tab.Screen name="SOS" component={SOSScreen} options={{ title: 'Voice SOS' }} />
-      <Tab.Screen name="Network" component={NetworkScreen} options={{ title: t('network') }} />
+      <Tab.Screen name="SOS" component={SOSScreen} options={{ title: t('sos') }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('profile') }} />
     </Tab.Navigator>
   );
@@ -80,15 +73,9 @@ function AppNavigator() {
 
   useEffect(() => {
     const checkState = async () => {
-      try {
-        const completed = await isOnboardingCompleted();
-        setOnboarded(!!completed);
-      } catch (err) {
-        console.log("Onboarding check info:", err);
-        setOnboarded(false);
-      } finally {
-        setLoading(false);
-      }
+      const completed = await isOnboardingCompleted();
+      setOnboarded(completed);
+      setLoading(false);
     };
     checkState();
   }, []);
@@ -103,13 +90,44 @@ function AppNavigator() {
 
   return (
     <NavigationContainer theme={customDarkTheme}>
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={onboarded ? "Main" : "PersonalInfo"}>
+      <Stack.Navigator 
+        initialRouteName={onboarded ? 'Main' : 'PersonalInfo'}
+        screenOptions={{ headerShown: false }}
+      >
         <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} />
         <Stack.Screen name="MedicalDetails" component={MedicalDetailsScreen} />
         <Stack.Screen name="EmergencyContact" component={EmergencyContactScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
-        <Stack.Screen name="ReportEmergency" component={ReportEmergencyScreen} options={{ headerShown: true, title: 'Report Emergency', headerStyle: { backgroundColor: '#1e1e1e' }, headerTintColor: '#fff' }} />
-        <Stack.Screen name="SafeZones" component={SafeZonesScreen} options={{ headerShown: true, title: 'Safe Zones', headerStyle: { backgroundColor: '#1e1e1e' }, headerTintColor: '#fff' }} />
+        <Stack.Screen 
+          name="ReportEmergency" 
+          component={ReportEmergencyScreen} 
+          options={{ 
+            headerShown: true, 
+            title: 'Report Emergency', 
+            headerStyle: { backgroundColor: '#1e1e1e' }, 
+            headerTintColor: '#fff' 
+          }} 
+        />
+        <Stack.Screen 
+          name="SafeZones" 
+          component={SafeZonesScreen} 
+          options={{ 
+            headerShown: true, 
+            title: 'Safe Zones', 
+            headerStyle: { backgroundColor: '#1e1e1e' }, 
+            headerTintColor: '#fff' 
+          }} 
+        />
+        <Stack.Screen 
+          name="LogoutConfirm" 
+          component={LogoutConfirmScreen} 
+          options={{ 
+            headerShown: true, 
+            title: 'Start Again', 
+            headerStyle: { backgroundColor: '#1e1e1e' }, 
+            headerTintColor: '#fff' 
+          }} 
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

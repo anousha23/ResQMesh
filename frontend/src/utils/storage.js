@@ -12,11 +12,7 @@ const STORAGE_KEYS = {
 export const setItem = async (key, value) => {
   try {
     const jsonValue = JSON.stringify(value);
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(key, jsonValue);
-    } else {
-      await AsyncStorage.setItem(key, jsonValue);
-    }
+    await AsyncStorage.setItem(key, jsonValue);
   } catch (e) {
     console.error(`Error setting item for key ${key}:`, e);
   }
@@ -24,10 +20,6 @@ export const setItem = async (key, value) => {
 
 export const getItem = async (key) => {
   try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const jsonValue = window.localStorage.getItem(key);
-      return jsonValue != null ? JSON.parse(jsonValue) : null;
-    }
     const jsonValue = await AsyncStorage.getItem(key);
     return jsonValue != null ? JSON.parse(jsonValue) : null;
   } catch (e) {
@@ -38,11 +30,7 @@ export const getItem = async (key) => {
 
 export const removeItem = async (key) => {
   try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.removeItem(key);
-    } else {
-      await AsyncStorage.removeItem(key);
-    }
+    await AsyncStorage.removeItem(key);
   } catch (e) {
     console.error(`Error removing item for key ${key}:`, e);
   }
@@ -99,6 +87,13 @@ export const saveIncident = async (incident) => {
 export const getIncidents = async () => {
   const incidents = await getItem(STORAGE_KEYS.INCIDENTS);
   return incidents || [];
+};
+
+export const resetUserData = async () => {
+  await removeItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+  await removeItem(STORAGE_KEYS.USER_PROFILE);
+  await removeItem(STORAGE_KEYS.MEDICAL_DETAILS);
+  await removeItem(STORAGE_KEYS.EMERGENCY_CONTACT);
 };
 
 export default STORAGE_KEYS;

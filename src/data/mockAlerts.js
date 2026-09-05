@@ -1,13 +1,13 @@
 export const MOCK_ALERTS = [
   {
     id: 'ALT-001',
-    type: 'Structural Collapse',
+    type: 'Structural Damage',
     severity: 'HIGH',
     distance: '1.8 km',
     location: 'Block A',
     timestamp: '2 mins ago',
-    recommendedAction: 'Move away from damaged structures.',
-    verification: 'Verified by 3 nearby nodes',
+    recommendedAction: 'Move to the nearest safe zone.',
+    verification: 'Official Emergency Advisory',
     verified: true,
   },
   {
@@ -18,7 +18,7 @@ export const MOCK_ALERTS = [
     location: 'Riverside Area',
     timestamp: '15 mins ago',
     recommendedAction: 'Move to higher ground immediately.',
-    verification: 'Verified by NODE-005',
+    verification: 'Official Emergency Advisory',
     verified: true,
   },
   {
@@ -29,7 +29,7 @@ export const MOCK_ALERTS = [
     location: 'Sector 4',
     timestamp: '1 hour ago',
     recommendedAction: 'Use alternate routes. Avoid main intersection.',
-    verification: 'Unverified report',
+    verification: 'Community Advisory',
     verified: false,
   }
 ];

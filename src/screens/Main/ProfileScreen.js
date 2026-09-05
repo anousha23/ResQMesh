@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation, AVAILABLE_LANGUAGES } from '../../localization';
 import { Card } from '../../components/UI';
 import { getUserProfile, getMedicalDetails, getEmergencyContact } from '../../utils/storage';
@@ -13,17 +14,20 @@ export default function ProfileScreen({ navigation }) {
   const [contact, setContact] = useState({});
   const [langSelectorOpen, setLangSelectorOpen] = useState(false);
 
-  useEffect(() => {
-    const loadData = async () => {
-      const p = await getUserProfile();
-      const m = await getMedicalDetails();
-      const c = await getEmergencyContact();
-      if (p) setProfile(p);
-      if (m) setMedical(m);
-      if (c) setContact(c);
-    };
-    loadData();
-  }, []);
+  const loadData = async () => {
+    const p = await getUserProfile();
+    const m = await getMedicalDetails();
+    const c = await getEmergencyContact();
+    if (p) setProfile(p);
+    if (m) setMedical(m);
+    if (c) setContact(c);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -117,6 +121,24 @@ export default function ProfileScreen({ navigation }) {
           </View>
         </Card>
 
+        {/* Log Out & Start Again Action */}
+        <View style={styles.logoutSection}>
+          <TouchableOpacity 
+            style={styles.logoutCard} 
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('LogoutConfirm')}
+          >
+            <View style={styles.logoutIconCircle}>
+              <Ionicons name="log-out-outline" size={22} color="#ef4444" />
+            </View>
+            <View style={styles.logoutTextContainer}>
+              <Text style={styles.logoutTitle}>{t('logoutAndReset')}</Text>
+              <Text style={styles.logoutSubtitle}>{t('logoutAndResetDesc')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#7f1d1d" />
+          </TouchableOpacity>
+        </View>
+
         <View style={{height: 40}} />
       </ScrollView>
     </SafeAreaView>
@@ -150,4 +172,38 @@ const styles = StyleSheet.create({
   langItem: { flexDirection: 'row', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#333' },
   langItemText: { color: '#ccc', fontSize: 16 },
   langItemTextActive: { color: '#ef4444', fontWeight: 'bold' },
+
+  logoutSection: { marginTop: 24, marginBottom: 8 },
+  logoutCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1414',
+    borderWidth: 1,
+    borderColor: '#7f1d1d',
+    borderRadius: 14,
+    padding: 16,
+  },
+  logoutIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#450a0a',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  logoutTextContainer: {
+    flex: 1,
+  },
+  logoutTitle: {
+    color: '#ef4444',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  logoutSubtitle: {
+    color: '#999',
+    fontSize: 12,
+    lineHeight: 16,
+  },
 });
