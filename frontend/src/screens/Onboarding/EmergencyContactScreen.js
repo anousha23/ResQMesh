@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useTranslation } from '../../localization';
 import { Input, Button } from '../../components/UI';
-import { saveEmergencyContact, completeOnboarding } from '../../utils/storage';
+import { saveEmergencyContact, getEmergencyContact, completeOnboarding } from '../../utils/storage';
 
 export default function EmergencyContactScreen({ navigation }) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [relationship, setRelationship] = useState('');
   const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    const loadContact = async () => {
+      const existing = await getEmergencyContact();
+      if (existing) {
+        if (existing.name) setName(existing.name);
+        if (existing.relationship) setRelationship(existing.relationship);
+        if (existing.phone) setPhone(existing.phone);
+      }
+    };
+    loadContact();
+  }, []);
 
   const handleFinish = async () => {
     await saveEmergencyContact({ name, relationship, phone });

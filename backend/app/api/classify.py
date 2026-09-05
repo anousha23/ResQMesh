@@ -1,22 +1,22 @@
 """
-Voice Transcript Classification Router
---------------------------------------
-Accepts voice transcripts and edge device coordinates, returning streamlined tactical
-disaster incident JSON reports for rescue command dashboards.
+Voice Transcript & Audio Classification Router
+----------------------------------------------
+Accepts audio files (WAV/M4A/MP3) or raw transcripts, transcribes them using local Whisper STT,
+and classifies them into streamlined tactical disaster incident reports for rescue teams.
 """
 
 from typing import Optional
-from fastapi import APIRouter, HTTPException, status
-from fastapi.exceptions import RequestValidationError
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 import logging
 
 from app.classifier import classify_transcript
+from app.stt_service import transcribe_audio_file
 
 logger = logging.getLogger("classify_api")
 
-router = APIRouter(prefix="", tags=["Voice Classification"])
+router = APIRouter(prefix="", tags=["Voice Classification & STT"])
 
 
 def send_to_root_node(incident_json: dict) -> bool:
@@ -70,11 +70,7 @@ def health_check():
 @router.post("/classify", status_code=200)
 def classify_incident_endpoint(payload: IncidentRequest):
     """
-    Main classification endpoint.
-    1. Validates input payload.
-    2. Invokes rule-based keyword & pattern classifier.
-    3. Triggers send_to_root_node WebSocket forwarding stub.
-    4. Returns streamlined tactical incident JSON.
+    Direct text transcript classification endpoint.
     """
     try:
         incident_report = classify_transcript(
@@ -98,4 +94,66 @@ def classify_incident_endpoint(payload: IncidentRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal classification error: {str(err)}"
+        )
+
+
+@router.post("/transcribe", status_code=200)
+async def transcribe_audio_endpoint(file: UploadFile = File(...)):
+    """
+    Transcribe recorded audio file to text using local offline Whisper STT.
+    """
+    try:
+        content = await file.read()
+        stt_result = transcribe_audio_file(content, file.filename or "voice.m4a")
+        return stt_result
+    except Exception as err:
+        logger.error(f"STT transcription endpoint error: {err}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Audio transcription failed: {str(err)}"
+        )
+
+
+@router.post("/transcribe-and-classify", status_code=200)
+async def transcribe_and_classify_endpoint(
+    file: UploadFile = File(...),
+    lat: Optional[float] = Form(None),
+    lon: Optional[float] = Form(None),
+    landmark_description: Optional[str] = Form(None),
+    fallback_text: Optional[str] = Form(None)
+):
+    """
+    1. Receives actual recorded audio file from user device.
+    2. Transcribes audio file offline using Whisper STT.
+    3. Runs transcribed text through incident_classifier.py.
+    4. Returns full tactical JSON report with actual heard transcript & classified parameters.
+    """
+    try:
+        content = await file.read()
+        stt_result = transcribe_audio_file(content, file.filename or "voice.m4a")
+        spoken_transcript = stt_result.get("transcript", "").strip()
+
+        # If audio transcription yields empty (or silent recording), fallback to provided text if available
+        if not spoken_transcript and fallback_text:
+            spoken_transcript = fallback_text.strip()
+
+        if not spoken_transcript:
+            spoken_transcript = "Emergency voice report received without clear speech"
+
+        incident_report = classify_transcript(
+            transcript=spoken_transcript,
+            lat=lat,
+            lon=lon,
+            landmark_description=landmark_description,
+            stt_confidence=stt_result.get("confidence", 0.90),
+        )
+
+        send_to_root_node(incident_report)
+        return incident_report
+
+    except Exception as err:
+        logger.error(f"Transcribe and classify failed: {err}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Audio transcription & classification failed: {str(err)}"
         )

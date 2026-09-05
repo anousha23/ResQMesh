@@ -3,7 +3,13 @@ import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Platform } from 'react-native';
+import { enableScreens } from 'react-native-screens';
+
+// Disable react-native-screens on Web to prevent blank screen rendering bugs
+if (Platform.OS === 'web') {
+  enableScreens(false);
+}
 
 import { LanguageProvider, useTranslation } from './src/localization';
 import { isOnboardingCompleted } from './src/utils/storage';
@@ -40,6 +46,7 @@ function MainTabs() {
   const { t } = useTranslation();
   return (
     <Tab.Navigator
+      initialRouteName="Home"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
@@ -60,7 +67,7 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: t('home') }} />
       <Tab.Screen name="Alerts" component={AlertsScreen} options={{ title: t('alerts') }} />
-      <Tab.Screen name="SOS" component={SOSScreen} options={{ title: t('sos') }} />
+      <Tab.Screen name="SOS" component={SOSScreen} options={{ title: 'Voice SOS' }} />
       <Tab.Screen name="Network" component={NetworkScreen} options={{ title: t('network') }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('profile') }} />
     </Tab.Navigator>
@@ -73,9 +80,15 @@ function AppNavigator() {
 
   useEffect(() => {
     const checkState = async () => {
-      const completed = await isOnboardingCompleted();
-      setOnboarded(completed);
-      setLoading(false);
+      try {
+        const completed = await isOnboardingCompleted();
+        setOnboarded(!!completed);
+      } catch (err) {
+        console.log("Onboarding check info:", err);
+        setOnboarded(false);
+      } finally {
+        setLoading(false);
+      }
     };
     checkState();
   }, []);
@@ -90,14 +103,10 @@ function AppNavigator() {
 
   return (
     <NavigationContainer theme={customDarkTheme}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!onboarded ? (
-          <Stack.Group>
-            <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} />
-            <Stack.Screen name="MedicalDetails" component={MedicalDetailsScreen} />
-            <Stack.Screen name="EmergencyContact" component={EmergencyContactScreen} />
-          </Stack.Group>
-        ) : null}
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={onboarded ? "Main" : "PersonalInfo"}>
+        <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} />
+        <Stack.Screen name="MedicalDetails" component={MedicalDetailsScreen} />
+        <Stack.Screen name="EmergencyContact" component={EmergencyContactScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="ReportEmergency" component={ReportEmergencyScreen} options={{ headerShown: true, title: 'Report Emergency', headerStyle: { backgroundColor: '#1e1e1e' }, headerTintColor: '#fff' }} />
         <Stack.Screen name="SafeZones" component={SafeZonesScreen} options={{ headerShown: true, title: 'Safe Zones', headerStyle: { backgroundColor: '#1e1e1e' }, headerTintColor: '#fff' }} />

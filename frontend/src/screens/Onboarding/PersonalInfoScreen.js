@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '../../localization';
 import { Input, Button } from '../../components/UI';
-import { saveUserProfile } from '../../utils/storage';
+import { saveUserProfile, getUserProfile } from '../../utils/storage';
 
 export default function PersonalInfoScreen({ navigation }) {
   const { t } = useTranslation();
@@ -12,6 +12,19 @@ export default function PersonalInfoScreen({ navigation }) {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [bloodType, setBloodType] = useState('');
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const existing = await getUserProfile();
+      if (existing) {
+        if (existing.photo) setPhoto(existing.photo);
+        if (existing.name) setName(existing.name);
+        if (existing.age) setAge(String(existing.age));
+        if (existing.bloodType) setBloodType(existing.bloodType);
+      }
+    };
+    loadProfile();
+  }, []);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({

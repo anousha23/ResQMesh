@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation, AVAILABLE_LANGUAGES } from '../../localization';
-import { Card } from '../../components/UI';
-import { getUserProfile, getMedicalDetails, getEmergencyContact } from '../../utils/storage';
+import { Card, Button } from '../../components/UI';
+import { getUserProfile, getMedicalDetails, getEmergencyContact, removeItem, STORAGE_KEYS } from '../../utils/storage';
 
 export default function ProfileScreen({ navigation }) {
   const { t, languageCode, changeLanguage } = useTranslation();
@@ -12,6 +12,19 @@ export default function ProfileScreen({ navigation }) {
   const [medical, setMedical] = useState({});
   const [contact, setContact] = useState({});
   const [langSelectorOpen, setLangSelectorOpen] = useState(false);
+
+  const handleResetProfile = async () => {
+    await removeItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+    const parentNav = navigation.getParent();
+    if (parentNav) {
+      parentNav.reset({
+        index: 0,
+        routes: [{ name: 'PersonalInfo' }],
+      });
+    } else {
+      navigation.navigate('PersonalInfo');
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -116,6 +129,14 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.value}>{contact.phone || '--'}</Text>
           </View>
         </Card>
+
+        <View style={{ marginTop: 24 }}>
+          <Button
+            title="Log Out / Edit Personal Details"
+            onPress={handleResetProfile}
+            variant="outline"
+          />
+        </View>
 
         <View style={{height: 40}} />
       </ScrollView>

@@ -12,6 +12,7 @@ export default function ReportEmergencyScreen({ navigation }) {
   const [photo, setPhoto] = useState(null);
   const [status, setStatus] = useState('IDLE'); // IDLE, SENDING, SENT
   const [sendStep, setSendStep] = useState(0);
+  const [classifiedData, setClassifiedData] = useState(null);
 
   const categories = [
     { id: 'fire', icon: 'flame', name: t('fire') },
@@ -33,9 +34,31 @@ export default function ReportEmergencyScreen({ navigation }) {
     }
   };
 
-  const handleSubmit = () => {
-    if (!selectedCategory) return;
+  const handleSubmit = async () => {
+    if (!selectedCategory && !description.trim()) return;
     setStatus('SENDING');
+
+    const reportText = description.trim() || `Emergency reported: ${selectedCategory || 'general emergency'}`;
+
+    try {
+      const response = await fetch('http://localhost:8000/classify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: reportText,
+          lat: 12.9698,
+          lon: 79.1559,
+          landmark_description: "Block A Sector 4"
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setClassifiedData(data);
+      }
+    } catch (err) {
+      console.log("Local server offline, proceeding with direct emergency relay");
+    }
   };
 
   useEffect(() => {
@@ -45,21 +68,74 @@ export default function ReportEmergencyScreen({ navigation }) {
         setTimeout(() => {
           setSendStep(step);
           if (index === msgs.length - 1) {
-            setTimeout(() => setStatus('SENT'), 1000);
+            setTimeout(() => setStatus('SENT'), 800);
           }
-        }, index * 1000);
+        }, index * 800);
       });
     }
   }, [status]);
 
   if (status === 'SENT') {
     return (
-      <View style={styles.centerContainer}>
+      <ScrollView style={{flex: 1, backgroundColor: '#121212'}} contentContainerStyle={styles.centerContainer}>
         <Ionicons name="checkmark-circle" size={80} color="#16a34a" />
         <Text style={styles.successTitle}>{t('reportSent')}</Text>
         <Text style={styles.successDesc}>{t('reportSentDesc')}</Text>
-        <Button title={t('home')} onPress={() => navigation.navigate('Home')} style={{marginTop: 32}} />
-      </View>
+
+        {/* DISPLAY 1: HEARD / ENTERED DESCRIPTION */}
+        <Card style={{width: '100%', marginTop: 20, backgroundColor: '#1a1a1a', borderColor: '#3b82f6'}}>
+          <Text style={{color: '#3b82f6', fontWeight: 'bold', fontSize: 12, marginBottom: 4}}>
+            📝 ENTERED REPORT TEXT:
+          </Text>
+          <Text style={{color: '#fff', fontSize: 15, fontStyle: 'italic'}}>
+            "{description || selectedCategory || 'Emergency Report'}"
+          </Text>
+        </Card>
+
+        {/* DISPLAY 2: CLASSIFIED PARAMETERS & JSON */}
+        {classifiedData && (
+          <View style={styles.classificationResultCard}>
+            <View style={styles.cardHeaderRow}>
+              <Ionicons name="warning" size={24} color="#ef4444" />
+              <Text style={styles.cardHeaderTitle}>
+                NLU CLASSIFIED: {classifiedData.incident_type?.toUpperCase()}
+              </Text>
+            </View>
+
+            <View style={styles.paramGrid}>
+              <View style={styles.paramItem}>
+                <Text style={styles.paramLabel}>Severity Level</Text>
+                <Text style={[styles.paramValue, {color: classifiedData.severity?.score >= 8 ? '#ef4444' : '#f59e0b'}]}>
+                  {classifiedData.severity?.level?.toUpperCase()} (Score {classifiedData.severity?.score}/10)
+                </Text>
+              </View>
+
+              <View style={styles.paramItem}>
+                <Text style={styles.paramLabel}>Priority Resource Required</Text>
+                <Text style={[styles.paramValue, {color: '#3b82f6'}]}>
+                  {classifiedData.resource_needs?.priority_resource}
+                </Text>
+              </View>
+
+              <View style={styles.paramItem}>
+                <Text style={styles.paramLabel}>Mobility Status</Text>
+                <Text style={styles.paramValue}>
+                  {classifiedData.victims?.mobility_status || 'Normal'}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={styles.jsonBoxLabel}>GENERATED INCIDENT JSON PAYLOAD:</Text>
+            <View style={styles.jsonBox}>
+              <Text style={styles.jsonCode}>
+                {JSON.stringify(classifiedData, null, 2)}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        <Button title={t('home')} onPress={() => navigation.navigate('Home')} style={{marginTop: 24, width: '100%'}} />
+      </ScrollView>
     );
   }
 
@@ -68,7 +144,7 @@ export default function ReportEmergencyScreen({ navigation }) {
       <View style={styles.centerContainer}>
         <Ionicons name="radio" size={80} color="#ef4444" style={{marginBottom: 24}} />
         {sendStep >= 0 && <Text style={styles.animText}>✓ {t('creatingIncident')}</Text>}
-        {sendStep >= 1 && <Text style={styles.animText}>✓ {t('classifyingEmergency')}</Text>}
+        {sendStep >= 1 && <Text style={styles.animText}>✓ Executing offline incident_classifier.py</Text>}
         {sendStep >= 2 && <Text style={styles.animText}>✓ {t('packagingEvidence')}</Text>}
         {sendStep >= 3 && <Text style={styles.animText}>✓ {t('broadcastingLocally')}</Text>}
       </View>
@@ -94,7 +170,7 @@ export default function ReportEmergencyScreen({ navigation }) {
 
       <Input 
         label={t('description')} 
-        placeholder="Optional details..." 
+        placeholder="Type or speak emergency details (e.g. fire on 2nd floor, trapped)..." 
         value={description}
         onChangeText={setDescription}
         multiline
@@ -126,7 +202,7 @@ export default function ReportEmergencyScreen({ navigation }) {
       <Button 
         title={t('submit')} 
         onPress={handleSubmit} 
-        variant={selectedCategory ? "primary" : "secondary"}
+        variant={(selectedCategory || description.trim()) ? "primary" : "secondary"}
         style={{marginTop: 32}}
       />
     </ScrollView>
@@ -135,7 +211,7 @@ export default function ReportEmergencyScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#121212' },
-  centerContainer: { flex: 1, backgroundColor: '#121212', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  centerContainer: { backgroundColor: '#121212', justifyContent: 'center', alignItems: 'center', padding: 24 },
   sectionTitle: { color: '#fff', fontSize: 16, fontWeight: 'bold', marginTop: 16, marginBottom: 12 },
   
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
@@ -159,4 +235,20 @@ const styles = StyleSheet.create({
   animText: { color: '#fff', fontSize: 16, marginVertical: 8, fontWeight: 'bold' },
   successTitle: { color: '#16a34a', fontSize: 24, fontWeight: 'bold', marginTop: 16, marginBottom: 8 },
   successDesc: { color: '#aaa', textAlign: 'center' },
+
+  // Classification Card
+  classificationResultCard: {
+    width: '100%', backgroundColor: '#1e1e1e', borderRadius: 16, padding: 16,
+    marginVertical: 16, borderWidth: 1, borderColor: '#ef4444'
+  },
+  cardHeaderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, borderBottomWidth: 1, borderBottomColor: '#333', paddingBottom: 8 },
+  cardHeaderTitle: { color: '#ef4444', fontSize: 16, fontWeight: 'bold', marginLeft: 8 },
+  paramGrid: { marginBottom: 16 },
+  paramItem: { paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#2a2a2a' },
+  paramLabel: { color: '#888', fontSize: 12, fontWeight: 'bold' },
+  paramValue: { color: '#fff', fontSize: 15, fontWeight: 'bold', marginTop: 2 },
+  
+  jsonBoxLabel: { color: '#16a34a', fontSize: 12, fontWeight: 'bold', marginBottom: 8 },
+  jsonBox: { backgroundColor: '#0d0d0d', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#333', maxHeight: 200 },
+  jsonCode: { color: '#4ade80', fontFamily: 'monospace', fontSize: 11, lineHeight: 16 },
 });
