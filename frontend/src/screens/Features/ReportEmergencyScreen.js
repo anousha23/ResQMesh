@@ -104,13 +104,6 @@ export default function ReportEmergencyScreen({ navigation }) {
 
             <View style={styles.paramGrid}>
               <View style={styles.paramItem}>
-                <Text style={styles.paramLabel}>Severity Level</Text>
-                <Text style={[styles.paramValue, {color: classifiedData.severity?.score >= 8 ? '#ef4444' : '#f59e0b'}]}>
-                  {classifiedData.severity?.level?.toUpperCase()} (Score {classifiedData.severity?.score}/10)
-                </Text>
-              </View>
-
-              <View style={styles.paramItem}>
                 <Text style={styles.paramLabel}>Priority Resource Required</Text>
                 <Text style={[styles.paramValue, {color: '#3b82f6'}]}>
                   {classifiedData.resource_needs?.priority_resource}

@@ -27,10 +27,9 @@ def send_to_root_node(incident_json: dict) -> bool:
     try:
         incident_id = incident_json.get("incident_id")
         incident_type = incident_json.get("incident_type")
-        severity_lvl = incident_json.get("severity", {}).get("level")
         priority_res = incident_json.get("resource_needs", {}).get("priority_resource")
         logger.info(
-            f"[WS FORWARD STUB] Dispatched Incident ID={incident_id} | Type={incident_type} | Severity={severity_lvl} | PriorityResource={priority_res}"
+            f"[WS FORWARD STUB] Dispatched Incident ID={incident_id} | Type={incident_type} | PriorityResource={priority_res}"
         )
         return True
     except Exception as err:

@@ -376,13 +376,6 @@ export default function SOSScreen() {
 
               <View style={styles.paramGrid}>
                 <View style={styles.paramItem}>
-                  <Text style={styles.paramLabel}>Severity Level</Text>
-                  <Text style={[styles.paramValue, {color: classifiedData.severity?.score >= 8 ? '#ef4444' : '#f59e0b'}]}>
-                    {classifiedData.severity?.level?.toUpperCase()} (Score {classifiedData.severity?.score}/10)
-                  </Text>
-                </View>
-
-                <View style={styles.paramItem}>
                   <Text style={styles.paramLabel}>Priority Resource Required</Text>
                   <Text style={[styles.paramValue, {color: '#3b82f6'}]}>
                     {classifiedData.resource_needs?.priority_resource}
@@ -407,13 +400,6 @@ export default function SOSScreen() {
                   <Text style={styles.paramLabel}>People Affected / Trapped</Text>
                   <Text style={styles.paramValue}>
                     {classifiedData.victims?.people_affected || 1} Affected / {classifiedData.victims?.people_trapped || 0} Trapped
-                  </Text>
-                </View>
-
-                <View style={styles.paramItem}>
-                  <Text style={styles.paramLabel}>Immediate Life Threat</Text>
-                  <Text style={[styles.paramValue, {color: classifiedData.severity?.life_threat_immediate ? '#ef4444' : '#16a34a'}]}>
-                    {classifiedData.severity?.life_threat_immediate ? 'YES (CRITICAL)' : 'NO'}
                   </Text>
                 </View>
               </View>

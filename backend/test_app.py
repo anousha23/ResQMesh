@@ -36,7 +36,6 @@ def test_valid_classification_post():
     assert "timestamp" in data
     assert "incident_type" in data
     assert "raw_transcript" in data
-    assert "severity" in data
     assert "location" in data
     assert "victims" in data
     assert "hazards" in data

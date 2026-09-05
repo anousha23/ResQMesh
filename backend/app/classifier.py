@@ -240,45 +240,7 @@ def _detect_hazards(text):
     }
 
 
-def _compute_severity(text, hazards, victims):
-    escalator_hits = 0
-    for pattern in SEVERITY_ESCALATORS:
-        if re.search(pattern, text, re.IGNORECASE):
-            escalator_hits += 1
-
-    score = min(10, escalator_hits * 2 + 2)
-
-    if victims.get("mobility_status") == "none_can_walk":
-        score = min(10, score + 3)
-    elif victims.get("mobility_status") == "some_cannot_walk":
-        score = min(10, score + 1)
-
-    if hazards.get("fire") and hazards.get("collapse_risk"):
-        score = min(10, score + 3)
-    elif any(v for k, v in hazards.items() if v):
-        score = min(10, score + 1)
-
-    vulnerable = victims.get("vulnerable_groups", {})
-    if any(vulnerable.values()):
-        score = min(10, score + 1)
-
-    if score >= 8:
-        label = "critical"
-    elif score >= 6:
-        label = "high"
-    elif score >= 4:
-        label = "moderate"
-    else:
-        label = "low"
-
-    return {
-        "level": label,
-        "score": score,
-        "life_threat_immediate": score >= 8,
-    }
-
-
-def _resource_needs(text, incident_type, hazards, victims, severity):
+def _resource_needs(text, incident_type, hazards, victims):
     needs = {
         "priority_resource": None,
         "needs_medical": False,
@@ -299,7 +261,7 @@ def _resource_needs(text, incident_type, hazards, victims, severity):
 
     # Extraction needs
     if (incident_type in ("trapped_person", "building_collapse", "landslide") or
-        victims.get("people_trapped_count") or
+        victims.get("people_trapped") or
         hazards.get("collapse_risk")):
         needs["needs_extraction"] = True
 
@@ -319,11 +281,11 @@ def _resource_needs(text, incident_type, hazards, victims, severity):
         needs["needs_evacuation_transport"] = True
 
     # Priority Resource Selection
-    if needs["needs_extraction"] and severity.get("score", 0) >= 6:
-        needs["priority_resource"] = "extraction"
-    elif needs["needs_fire_suppression"]:
+    if needs["needs_fire_suppression"]:
         needs["priority_resource"] = "fire_suppression"
-    elif needs["needs_medical"] and (severity.get("life_threat_immediate") or incident_type == "medical_emergency"):
+    elif needs["needs_extraction"]:
+        needs["priority_resource"] = "extraction"
+    elif needs["needs_medical"] and (victims.get("unconscious") or incident_type == "medical_emergency"):
         needs["priority_resource"] = "medical"
     elif needs["needs_evacuation_transport"]:
         needs["priority_resource"] = "evacuation_transport"
@@ -370,15 +332,13 @@ def classify_transcript(transcript, lat=None, lon=None,
         "vulnerable_groups": vulnerable_groups,
     }
 
-    severity = _compute_severity(text, hazards, victims)
-    resource_needs = _resource_needs(text, incident_type, hazards, victims, severity)
+    resource_needs = _resource_needs(text, incident_type, hazards, victims)
 
     incident = {
         "incident_id": str(uuid.uuid4()),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "incident_type": incident_type,
         "raw_transcript": transcript,
-        "severity": severity,
         "location": {
             "latitude": lat,
             "longitude": lon,
