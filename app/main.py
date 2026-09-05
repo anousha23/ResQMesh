@@ -1,0 +1,25 @@
+from fastapi import FastAPI
+from app.api.devices import router as devices_router
+from app.api.events import router as events_router
+from app.database.database import Base, engine
+
+# Create DB tables on startup
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="ResQMesh Backend",
+    description="Offline-First Disaster Response Coordination System API",
+    version="0.1.0",
+)
+
+app.include_router(devices_router)
+app.include_router(events_router)
+
+
+@app.get("/")
+def root():
+    return {
+        "system": "ResQMesh Backend",
+        "status": "ONLINE",
+        "docs_url": "/docs"
+    }
