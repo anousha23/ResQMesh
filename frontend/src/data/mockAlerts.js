@@ -1,0 +1,35 @@
+export const MOCK_ALERTS = [
+  {
+    id: 'ALT-001',
+    type: 'Structural Collapse',
+    severity: 'HIGH',
+    distance: '1.8 km',
+    location: 'Block A',
+    timestamp: '2 mins ago',
+    recommendedAction: 'Move away from damaged structures.',
+    verification: 'Verified by 3 nearby nodes',
+    verified: true,
+  },
+  {
+    id: 'ALT-002',
+    type: 'Flood Warning',
+    severity: 'MEDIUM',
+    distance: '3.2 km',
+    location: 'Riverside Area',
+    timestamp: '15 mins ago',
+    recommendedAction: 'Move to higher ground immediately.',
+    verification: 'Verified by NODE-005',
+    verified: true,
+  },
+  {
+    id: 'ALT-003',
+    type: 'Road Blockage',
+    severity: 'LOW',
+    distance: '2.7 km',
+    location: 'Sector 4',
+    timestamp: '1 hour ago',
+    recommendedAction: 'Use alternate routes. Avoid main intersection.',
+    verification: 'Unverified report',
+    verified: false,
+  }
+];
