@@ -12,6 +12,18 @@ export default function App() {
   const [shelters] = useState(mockShelters);
   const [selectedIncidentId, setSelectedIncidentId] = useState(null);
 
+  // Automatically find highest priority incident (CRITICAL > HIGH > MEDIUM > LOW)
+  const severityRank = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+  const highestPriorityIncident = incidents.reduce((prev, curr) => {
+    if (!prev) return curr;
+    const currRank = severityRank[curr.severity] || 0;
+    const prevRank = severityRank[prev.severity] || 0;
+    if (currRank > prevRank) return curr;
+    if (currRank === prevRank && curr.minutesAgo < prev.minutesAgo) return curr;
+    return prev;
+  }, null);
+
+  const highestPriorityIncidentId = highestPriorityIncident?.id || null;
   const selectedIncident = incidents.find((i) => i.id === selectedIncidentId);
 
   // Optional hackathon demo interaction: Simulate incoming mesh broadcast incident
@@ -40,9 +52,12 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-slate-100 overflow-hidden font-sans">
+    <div className="flex flex-col h-screen w-screen bg-[#0d1117] text-[#f0f6fc] overflow-hidden font-sans">
       {/* Top Slim Header */}
-      <Header onSimulateIncident={handleSimulateIncident} />
+      <Header
+        onSimulateIncident={handleSimulateIncident}
+        hasCriticalAlert={incidents.some(i => i.severity === 'CRITICAL')}
+      />
 
       {/* Main Command Workspace */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
@@ -51,6 +66,7 @@ export default function App() {
           <IncidentFeed
             incidents={incidents}
             selectedIncidentId={selectedIncidentId}
+            highestPriorityIncidentId={highestPriorityIncidentId}
             onSelectIncident={setSelectedIncidentId}
           />
         </div>
@@ -61,6 +77,7 @@ export default function App() {
             incidents={incidents}
             shelters={shelters}
             selectedIncidentId={selectedIncidentId}
+            highestPriorityIncidentId={highestPriorityIncidentId}
             onSelectIncident={setSelectedIncidentId}
           />
 
@@ -75,7 +92,10 @@ export default function App() {
 
         {/* Section C: Situation Summary (Right Side Panel ~20%) */}
         <div className="w-full md:w-64 lg:w-72 h-auto md:h-full shrink-0">
-          <SituationSummary incidents={incidents} />
+          <SituationSummary
+            incidents={incidents}
+            highestPriorityIncidentId={highestPriorityIncidentId}
+          />
         </div>
       </div>
 
