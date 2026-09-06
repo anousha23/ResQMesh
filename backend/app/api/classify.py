@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 import logging
 
-from app.classifier import classify_transcript
+from app.classifier import classify_transcript, send_incident
 from app.stt_service import transcribe_audio_file
 
 logger = logging.getLogger("classify_api")
@@ -21,19 +21,21 @@ router = APIRouter(prefix="", tags=["Voice Classification & STT"])
 
 def send_to_root_node(incident_json: dict) -> bool:
     """
-    Stub function to forward the generated incident JSON report to the root node's
-    WebSocket server or mesh gateway endpoint.
+    Forwards the generated incident JSON report to Laptop B over local LAN TCP socket.
     """
     try:
-        incident_id = incident_json.get("incident_id")
-        incident_type = incident_json.get("incident_type")
-        priority_res = incident_json.get("resource_needs", {}).get("priority_resource")
-        logger.info(
-            f"[WS FORWARD STUB] Dispatched Incident ID={incident_id} | Type={incident_type} | PriorityResource={priority_res}"
-        )
-        return True
+        success = send_incident(incident_json)
+        if success:
+            logger.info(
+                f"[LAN DISPATCH SUCCESS] Transmitted Incident ID={incident_json.get('incident_id')} to Laptop B"
+            )
+        else:
+            logger.warning(
+                f"[LAN DISPATCH NOTICE] Host Laptop B not reached over LAN. Preserving incident report locally."
+            )
+        return success
     except Exception as err:
-        logger.error(f"[WS FORWARD STUB ERROR] Could not forward incident: {err}")
+        logger.error(f"[LAN DISPATCH ERROR] Could not forward incident: {err}")
         return False
 
 

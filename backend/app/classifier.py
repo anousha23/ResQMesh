@@ -18,7 +18,34 @@ Usage:
 import re
 import json
 import uuid
+import socket
 from datetime import datetime, timezone
+
+# ---------------------------------------------------------------------------
+# Network configuration (Laptop A -> Laptop B)
+# ---------------------------------------------------------------------------
+RECEIVER_HOST = "192.168.137.1"   # Laptop B (Windows hotspot host) IP
+RECEIVER_PORT = 8000
+SEND_TIMEOUT_SECONDS = 5
+
+
+def send_incident(data: dict, host: str = RECEIVER_HOST, port: int = RECEIVER_PORT) -> bool:
+    """
+    Send a classified incident dict as JSON to the receiving laptop (Laptop B).
+    Returns True if the send succeeded, False otherwise. Never raises -
+    a failed network send should not crash a field-deployed classifier.
+    """
+    try:
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.settimeout(SEND_TIMEOUT_SECONDS)
+        client.connect((host, port))
+        client.sendall(json.dumps(data).encode("utf-8"))
+        client.close()
+        print(f"[send_incident] Sent incident {data.get('incident_id')} to {host}:{port}")
+        return True
+    except (socket.timeout, ConnectionRefusedError, OSError) as e:
+        print(f"[send_incident] Failed to send incident to {host}:{port} -> {e}")
+        return False
 
 # ---------------------------------------------------------------------------
 # Keyword Banks & Pattern Specifications

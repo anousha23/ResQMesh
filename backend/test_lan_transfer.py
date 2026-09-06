@@ -25,7 +25,7 @@ SAMPLE_TRANSCRIPTS = [
     "Building wall collapsed after earthquake, 3 people trapped in rubble"
 ]
 
-def test_lan_send(host_ip, port):
+def run_lan_send(host_ip, port):
     target_url = f"http://{host_ip}:{port}/receive_incident"
     print(f"\n==================================================")
     print(f"📡 Testing LAN Transmission to Host Node")
@@ -86,4 +86,4 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8000, help="Host Receiver Port (default: 8000)")
     args = parser.parse_args()
 
-    test_lan_send(args.host, args.port)
+    run_lan_send(args.host, args.port)
