@@ -4,11 +4,13 @@ from app.database.database import get_db
 from app.models.device import Device
 from app.models.event import Event
 from app.schemas.event import EventCreate, EventResponse
+from app.schemas.incident import EventIngestResponse
+from app.services.incident_service import process_event_pipeline
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
 
-@router.post("", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=EventIngestResponse, status_code=status.HTTP_201_CREATED)
 def create_event(event_in: EventCreate, db: Session = Depends(get_db)):
     # 1. Check if device exists
     device = db.query(Device).filter(Device.device_id == event_in.device_id).first()
@@ -44,7 +46,27 @@ def create_event(event_in: EventCreate, db: Session = Depends(get_db)):
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
-    return db_event
+
+    # 5. Process event through Phase 2 Incident Intelligence pipeline
+    incident, action = process_event_pipeline(db, db_event)
+
+    # 6. Format location output matching EventResponse format
+    location_dict = None
+    if db_event.latitude is not None or db_event.longitude is not None:
+        location_dict = {"lat": db_event.latitude, "lon": db_event.longitude}
+
+    return {
+        "event_id": db_event.event_id,
+        "device_id": db_event.device_id,
+        "timestamp": db_event.timestamp,
+        "location": location_dict,
+        "event_type": db_event.event_type,
+        "confidence": db_event.confidence,
+        "data": db_event.data,
+        "created_at": db_event.created_at,
+        "incident_id": incident.incident_id,
+        "incident_action": action,
+    }
 
 
 @router.get("", response_model=list[EventResponse])
