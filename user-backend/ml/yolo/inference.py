@@ -19,17 +19,20 @@ if not os.path.exists(image_path):
     sys.exit()
 
 # Run YOLO
+# Run YOLO
 results = model(image_path, conf=0.25)
 
 for result in results:
 
+    # Save annotated image
+    annotated_path = os.path.splitext(image_path)[0] + "_annotated.jpg"
+    result.save(filename=annotated_path)
+
     detections = []
 
     for box in result.boxes:
-
         class_id = int(box.cls[0])
         confidence = float(box.conf[0])
-
         x1, y1, x2, y2 = box.xyxy[0].tolist()
 
         detections.append({
@@ -71,3 +74,4 @@ for result in results:
         json.dump(output, f, indent=2)
 
     print(f"\nJSON saved to: {json_path}")
+    print(f"Annotated image saved to: {annotated_path}")

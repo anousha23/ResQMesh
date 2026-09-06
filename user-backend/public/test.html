@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ResQMesh User Backend — Test Suite</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 { color: #38bdf8; }
+    .box {
+      background: #1e293b;
+      padding: 16px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    button {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-top: 6px;
+    }
+    button:hover { background: #0369a1; }
+    button.sos { background: #dc2626; }
+    button.sos:hover { background: #b91c1c; }
+    button.reset { background: #475569; }
+    input, select {
+      padding: 8px;
+      margin-bottom: 8px;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+      background: #0f172a;
+      color: white;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      display: block;
+    }
+    pre {
+      background: #000;
+      color: #00ff66;
+      padding: 14px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 14px;
+      min-height: 120px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🚨 ResQMesh User Backend Test Dashboard</h1>
+  <p>Click any button below to test live functionality.</p>
+
+  <!-- Section 1 -->
+  <div class="box">
+    <h3>1. Server Health</h3>
+    <button onclick="testHealth()">TEST HEALTH CHECK</button>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="box">
+    <h3>2. Sarvam AI Regional to English Translation</h3>
+    <label>Regional Input Text:</label>
+    <input type="text" id="transText" value="इमारत में आग लग गई है">
+    <button onclick="testTranslate()">TRANSLATE VIA SARVAM AI</button>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="box">
+    <h3>3. Sarvam AI Multilingual UI Dictionary</h3>
+    <label>Select Language:</label>
+    <select id="langSelect">
+      <option value="hi-IN">Hindi (hi-IN)</option>
+      <option value="ta-IN">Tamil (ta-IN)</option>
+      <option value="te-IN">Telugu (te-IN)</option>
+      <option value="mr-IN">Marathi (mr-IN)</option>
+      <option value="bn-IN">Bengali (bn-IN)</option>
+      <option value="gu-IN">Gujarati (gu-IN)</option>
+      <option value="kn-IN">Kannada (kn-IN)</option>
+      <option value="en-IN">English (en-IN)</option>
+    </select>
+    <button onclick="testDictionary()">FETCH UI DICTIONARY</button>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="box">
+    <h3>4. User Onboarding Flow (Step 1, 2, 3)</h3>
+    <input type="text" id="userName" value="Rajesh Kumar" placeholder="Full Name">
+    <input type="text" id="userPhone" value="+919876543210" placeholder="Phone Number">
+    <button onclick="testOnboarding()">RUN COMPLETE ONBOARDING</button>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="box">
+    <h3>5. Trigger Emergency SOS</h3>
+    <input type="text" id="sosPrompt" value="मकान के अंदर फंसा हुआ हूं" placeholder="Emergency description">
+    <button class="sos" onclick="testSOS()">🚨 TRIGGER SOS REQUEST</button>
+    <button onclick="testSOSStatus()">CHECK SOS STATUS</button>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="box">
+    <h3>6. Session Reset</h3>
+    <button class="reset" onclick="testReset()">LOG OUT & START AGAIN</button>
+  </div>
+
+  <!-- Live Output Box -->
+  <div class="box">
+    <h3>Live API Response JSON:</h3>
+    <pre id="result">Click any test button above...</pre>
+  </div>
+
+  <script>
+    function show(json) {
+      document.getElementById('result').textContent = JSON.stringify(json, null, 2);
+    }
+
+    function testHealth() {
+      fetch('/api/v1/health')
+        .then(r => r.json())
+        .then(show)
+        .catch(e => show({ error: e.message }));
+    }
+
+    function testTranslate() {
+      const text = document.getElementById('transText').value;
+      fetch('/api/v1/sarvam/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text, source_lang: 'hi-IN', target_lang: 'en-IN' })
+      })
+      .then(r => r.json())
+      .then(show)
+      .catch(e => show({ error: e.message }));
+    }
+
+    function testDictionary() {
+      const lang = document.getElementById('langSelect').value;
+      fetch('/api/v1/sarvam/dictionary?lang=' + lang)
+        .then(r => r.json())
+        .then(show)
+        .catch(e => show({ error: e.message }));
+    }
+
+    function testOnboarding() {
+      const name = document.getElementById('userName').value;
+      const phone = document.getElementById('userPhone').value;
+      const lang = document.getElementById('langSelect').value;
+
+      // Step 1
+      fetch('/api/v1/user/onboarding/step1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: name, age: 34, blood_group: 'O+' })
+      })
+      .then(r => r.json())
+      .then(data1 => {
+        const uid = data1.data.user_id;
+        // Step 2
+        return fetch('/api/v1/user/onboarding/step2', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: uid, allergies: 'Penicillin', medical_conditions: 'Asthma', medications: 'Inhaler' })
+        })
+        .then(r => r.json())
+        .then(() => {
+          // Step 3
+          return fetch('/api/v1/user/onboarding/step3', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: uid, contact_name: 'Priya Kumar', relationship: 'Spouse', phone_number: phone, preferred_language: lang })
+          });
+        });
+      })
+      .then(r => r.json())
+      .then(show)
+      .catch(e => show({ error: e.message }));
+    }
+
+    function testSOS() {
+      const desc = document.getElementById('sosPrompt').value;
+      fetch('/api/v1/sos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emergency_type: 'TRAPPED',
+          description: desc,
+          latitude: 28.6139,
+          longitude: 77.2090
+        })
+      })
+      .then(r => r.json())
+      .then(show)
+      .catch(e => show({ error: e.message }));
+    }
+
+    function testSOSStatus() {
+      fetch('/api/v1/sos/status')
+        .then(r => r.json())
+        .then(show)
+        .catch(e => show({ error: e.message }));
+    }
+
+    function testReset() {
+      fetch('/api/v1/user/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      })
+      .then(r => r.json())
+      .then(show)
+      .catch(e => show({ error: e.message }));
+    }
+  </script>
+</body>
+</html>
